@@ -1,5 +1,6 @@
-#include "rng-state.h"
 #include "rng-state-c.h"
+
+#include "rng-state.h"
 
 #include <cstdlib>
 

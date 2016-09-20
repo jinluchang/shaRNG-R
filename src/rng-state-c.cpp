@@ -18,6 +18,14 @@ void rng_split(RngStateInt32s* rsi, const RngStateInt32s* rsi0, const long sinde
   exportRngState(rsi->v, rs);
 }
 
+void rng_split_cstr(RngStateInt32s* rsi, const RngStateInt32s* rsi0, const char* sindex)
+{
+  RngState rs;
+  importRngState(rs, rsi0->v);
+  splitRngState(rs, rs, sindex);
+  exportRngState(rsi->v, rs);
+}
+
 double rng_runif(RngStateInt32s* rsi)
 {
   RngState rs;

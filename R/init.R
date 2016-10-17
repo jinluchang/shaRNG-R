@@ -1,13 +1,13 @@
 .onLoad <- function(lib, pkg) {
 	library.dynam("shaRNG", pkg, lib)
-	RNG.use.sha()
+	useShaRng()
 }
 
-RNG.use.sha <- function() {
+useShaRng <- function() {
     RNGkind("user", "user")
 }
 
-RNG.use.default <- function() {
+useDefaultRng <- function() {
 	RNGkind("default", "default")
 }
 

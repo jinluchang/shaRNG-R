@@ -16,66 +16,66 @@ NULL
 #' the integer vector of the current value of \code{.Random.seed}. For
 #' more details, see \code{\link{.Random.seed}}.
 #'
-RNG.get.state <- function() {
+getRngState <- function() {
 	return(.Random.seed)
 }
 
-RNG.set.state <- function(state) {
+setRngState <- function(state) {
 	.Random.seed <<- state
 }
 
-RNG.sync <- function(cl = NULL) {
+syncRng <- function(cl = NULL) {
 	sync <- function(state) {
 		library(shaRNG)
-		RNG.set.state(state)
+    setRngState(state)
 	}
-	clusterCall(cl, sync, RNG.get.state())
+	clusterCall(cl, sync, getRngState())
 	invisible(NULL)
 }
 
-RNG.root.state <- function() {
+rootRngState <- function() {
 	.Call("root_rng_state")
 }
 
-RNG.split.state <- function(state, sindex) {
+splitRngState <- function(state, sindex) {
 	.Call("split_rng_state", state, sindex)
 }
 
-RNG.seed.state <- function(seed) {
-	RNG.split.state(RNG.root.state(), paste(seed, collapse=" ; "))
+seedRngState <- function(seed) {
+	splitRngState(rootRngState(), paste(seed, collapse=" ; "))
 }
 
-RNG.set.root.state <- function() {
-	RNG.set.state(RNG.root.state())
+setRootRngState <- function() {
+	setRngState(rootRngState())
 }
 
-RNG.set.seed.state <- function(seed) {
-	RNG.set.state(RNG.seed.state(seed))
+setSeedRngState <- function(seed) {
+	setRngState(seedRngState(seed))
 }
 
-RNG.set.split.state <- function(state, sindex) {
-	RNG.set.state(RNG.split.state(state, sindex))
+setSplitRngState <- function(state, sindex) {
+	setRngState(splitRngState(state, sindex))
 }
 
-RNG.jump <- function(sindex = "") {
-	RNG.set.split.state(RNG.get.state(), sindex)
+jumpRng <- function(sindex = "") {
+	setSplitRngState(getRngState(), sindex)
 }
 
-RNG.save.eval <- function(expr) {
-	old.state <- RNG.get.state()
+saveRngEval <- function(expr) {
+	old.state <- getRngState()
 	force(expr)
-	RNG.set.state(old.state)
+	setRngState(old.state)
 	return(expr)
 }
 
-RNG.split.eval <- function(sindex, expr) {
-	RNG.save.eval({
-		RNG.set.split.state(RNG.get.state(), sindex)
+splitRngEval <- function(sindex, expr) {
+	saveRngEval({
+		setSplitRngState(getRngState(), sindex)
 		force(expr)
 	})
 }
 
-`%RNG.split.eval%` <- RNG.split.eval
+`%splitRngEval%` <- splitRngEval
 
 #' @param root.state the start state for splitting,
 #' which is an interger vector in
@@ -86,7 +86,7 @@ RNG.split.eval <- function(sindex, expr) {
 #' @param n.stream desired number of splitted streams. A non-negative number,
 #' which will be rounded down if fractional
 #'
-GetSplitStates <- function(n.stream = NULL,
+getSplitStates <- function(n.stream = NULL,
 						   indices = seq(n.stream),
 						   root.state = NULL) {
 

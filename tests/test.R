@@ -1,13 +1,13 @@
 install.packages("shaRNG_0.1.tar.gz")
 
-test.rng <- function()
+testRng <- function()
 {
 	print("test.rng")
 	set.seed(0)
-	seed0 <- RNG.get.state()
+	seed0 <- getRngState()
 	rs0 <- c(runif(3), rnorm(3))
 	print(rs0)
-	RNG.set.state(seed0)
+	setRngState(seed0)
 	rs0r <- c(runif(3), rnorm(3))
 	print(paste("zero = ", rs0 - rs0r))
 }
@@ -15,92 +15,92 @@ test.rng <- function()
 library(shaRNG)
 
 print("initial")
-RNG.get.state()
+getRngState()
 c(runif(3), rnorm(3))
 
-test.rng()
+testRng()
 
-RNG.use.default()
+useDefaultRng()
 
-test.rng()
+testRng()
 
 print("initial 2")
-RNG.use.sha()
-RNG.get.state()
+useShaRng()
+getRngState()
 c(runif(3), rnorm(3))
 
 print("initial 3")
-RNG.use.sha()
-RNG.get.state()
+useShaRng()
+getRngState()
 c(runif(3), rnorm(3))
 
 
-RNG.get.state()
+getRngState()
 
-RNG.root.state()
+rootRngState()
 
 set.seed(0)
 
-RNG.get.state()
+getRngState()
 
 set.seed(10)
 
-RNG.get.state()
+getRngState()
 
 runif(1)
 runif(1)
 runif(1)
 
-RNG.set.state(RNG.split.state(RNG.root.state(), 10))
+setRngState(splitRngState(rootRngState(), 10))
 
-RNG.get.state()
+getRngState()
 
 runif(1)
 runif(1)
 runif(1)
 
-RNG.get.state()
+getRngState()
 
 sample(10)
 
-s <- RNG.get.state()
+s <- getRngState()
 
 s
 
-s <- RNG.split.state(s, 10)
+s <- splitRngState(s, 10)
 
 s
 
-s <- RNG.split.state(s, "3")
+s <- splitRngState(s, "3")
 
 s
 
-RNG.set.state(s)
+setRngState(s)
 
 c(runif(3), rnorm(3))
 
-RNG.get.state()
+getRngState()
 
 c(runif(3), rnorm(3))
 
-RNG.split.eval("hello", rnorm(3))
+splitRngEval("hello", rnorm(3))
 
-RNG.split.eval("hello", rnorm(3))
+splitRngEval("hello", rnorm(3))
 
-"hello" %RNG.split.eval% {
+"hello" %splitRngEval% {
 	rnorm(3)
 	rnorm(3)
 }
 
-RNG.split.eval("hello2", rnorm(3))
+splitRngEval("hello2", rnorm(3))
 
-RNG.split.eval("hello", rnorm(6))
+splitRngEval("hello", rnorm(6))
 
-RNG.set.seed.state(134)
+setSeedRngState(134)
 
 # set.seed(134)
 
-# RNG.set.split.state(RNG.get.state(), 122)
+# setSplitRngState(getRngState(), 122)
 
 runif(10)
 rnorm(10)

@@ -91,9 +91,9 @@ getSplitStates <- function(n.stream = NULL,
 						   root.state = NULL) {
 
 	if (is.null(root.state))
-		root.state <- RNG.get.state()
+		root.state <- getRngState()
 	sub.states <- lapply(indices, function(sindex)
-						 RNG.split.state(root.state,
+						 splitRngState(root.state,
 										 sindex))
 	names(sub.states) <- indices
 	return(list(sub.states = sub.states, root.state = root.state))

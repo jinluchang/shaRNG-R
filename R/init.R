@@ -4,7 +4,7 @@
 }
 
 useShaRng <- function() {
-    RNGkind("user", "user")
+  RNGkind("user", "user")
 }
 
 useDefaultRng <- function() {

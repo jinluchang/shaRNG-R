@@ -24,7 +24,8 @@ setRngState <- function(state) {
 	.Random.seed <<- state
 }
 
-syncRng <- function(cl = NULL) {
+#' set the state of all slaves to the same as master state
+syncRng <- function(cl) {
 	sync <- function(state) {
 		library(shaRNG)
     setRngState(state)
@@ -33,6 +34,8 @@ syncRng <- function(cl = NULL) {
 	invisible(NULL)
 }
 
+
+#' get the root state
 rootRngState <- function() {
 	.Call("root_rng_state")
 }
@@ -41,6 +44,7 @@ splitRngState <- function(state, sindex) {
 	.Call("split_rng_state", state, sindex)
 }
 
+#' split a new state using the root state and seed
 seedRngState <- function(seed) {
 	splitRngState(rootRngState(), paste(seed, collapse=" ; "))
 }

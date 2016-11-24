@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <endian.h>
 #include <cstring>
+#include <climits>
 #include <cmath>
 #include <cassert>
 #include <string>
@@ -53,6 +54,8 @@ inline void splitRngState(RngState& rs, const RngState& rs0, const long sindex =
   splitRngState(rs, rs0, show(sindex));
 }
 
+inline void setType(RngState& rs, const unsigned long type);
+
 inline uint64_t randGen(RngState& rs);
 
 inline double uRandGen(RngState& rs, const double upper = 1.0, const double lower = 0.0);
@@ -65,7 +68,7 @@ struct RngState
 {
   uint64_t numBytes;
   uint32_t hash[8];
-  long type;
+  unsigned long type;
   unsigned long index;
   //
   uint64_t cache[3];
@@ -92,20 +95,29 @@ struct RngState
   }
   RngState(const RngState& rs0, const std::string& sindex)
   {
+    std::memset(this, 0, sizeof(RngState));
     splitRngState(*this, rs0, sindex);
   }
   RngState(const RngState& rs0, const long sindex)
   {
+    std::memset(this, 0, sizeof(RngState));
     splitRngState(*this, rs0, sindex);
   }
   //
-  RngState split(const std::string& sindex)
+  RngState split(const std::string& sindex) const
   {
     return RngState(*this, sindex);
   }
-  RngState split(const long sindex)
+  RngState split(const long sindex) const
   {
     return RngState(*this, sindex);
+  }
+  //
+  RngState newtype(const unsigned long type) const
+  {
+    RngState rs(*this);
+    setType(rs, type);
+    return rs;
   }
 };
 
@@ -115,9 +127,13 @@ inline RngState& getGlobalRngState()
   return rs;
 }
 
-inline void setType(RngState& rs, long type = 0)
+inline void setType(RngState& rs, const unsigned long type)
 {
+  assert(ULONG_MAX == rs.type);
+  assert(ULONG_MAX != type);
   rs.type = type;
+  rs.cacheAvail = 0;
+  rs.gaussianAvail = false;
 }
 
 const size_t RNG_STATE_NUM_OF_INT32 = 2 + 8 + 2 + 2 + 3 * 2 + 2 + 1 + 1;
@@ -218,7 +234,12 @@ inline std::string show(const RngState& rs)
 
 inline bool operator==(const RngState& rs1, const RngState& rs2)
 {
-  return 0 == memcmp(&rs1, &rs2, sizeof(RngState));
+  return 0 == std::memcmp(&rs1, &rs2, sizeof(RngState));
+}
+
+inline bool operator!=(const RngState& rs1, const RngState& rs2)
+{
+  return !(rs1 == rs2);
 }
 
 inline void reset(RngState& rs)
@@ -226,7 +247,7 @@ inline void reset(RngState& rs)
   std::memset(&rs, 0, sizeof(RngState));
   rs.numBytes = 0;
   sha256::setInitialHash(rs.hash);
-  rs.type = 0;
+  rs.type = ULONG_MAX;
   rs.index = 0;
   rs.cache[0] = 0;
   rs.cache[1] = 0;
@@ -248,7 +269,7 @@ inline void splitRngState(RngState& rs, const RngState& rs0, const std::string& 
   // the function should behave correctly even if ``rs'' is actually ``rs0''
 {
   std::string data;
-  if (0 == rs0.type) {
+  if (ULONG_MAX == rs0.type) {
     data = ssprintf("[%lu] {%s}", rs0.index, sindex.c_str());
   } else {
     data = ssprintf("[%ld,%lu] {%s}", rs0.type, rs0.index, sindex.c_str());
@@ -260,7 +281,7 @@ inline void splitRngState(RngState& rs, const RngState& rs0, const std::string& 
     sha256::processBlock(rs.hash, rs.hash, (const uint8_t*)data.c_str() + i * 64);
   }
   rs.numBytes = rs0.numBytes + nBlocks * 64;
-  rs.type = 0;
+  rs.type = ULONG_MAX;
   rs.index = 0;
   rs.cache[0] = 0;
   rs.cache[1] = 0;
@@ -286,7 +307,7 @@ inline uint64_t randGen(RngState& rs)
     return r;
   } else {
     uint32_t hash[8];
-    if (0 == rs.type) {
+    if (ULONG_MAX == rs.type) {
       computeHashWithInput(hash, rs, ssprintf("[%lu]", rs.index));
     } else {
       computeHashWithInput(hash, rs, ssprintf("[%ld,%lu]", rs.type, rs.index));

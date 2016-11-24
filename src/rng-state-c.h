@@ -6,7 +6,7 @@ extern "C" {
 
 #include <stdint.h>
 
-#define RNG_NUM_OF_INT32 22
+#define RNG_NUM_OF_INT32 24
 
 typedef struct RngStateInt32s
 {
